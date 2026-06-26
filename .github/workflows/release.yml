@@ -50,8 +50,9 @@ jobs:
         with:
           name: semaphore-${{ matrix.target }}
           path: |
-            src-tauri/target/${{ matrix.target }}/release/bundle/**/*
-            target/${{ matrix.target }}/release/semctl*
+            target/${{ matrix.target }}/release/bundle/**/*
+            target/${{ matrix.target }}/release/semctl
+            target/${{ matrix.target }}/release/semctl.exe
 
   release:
     needs: build
@@ -66,6 +67,9 @@ jobs:
           mkdir -p release-assets
           find artifacts -type f | while read -r file; do
             base=$(basename "$file")
+            case "$base" in
+              *.d|*.pdb) continue ;;
+            esac
             case "$file" in
               *aarch64-apple-darwin*) suffix="-macos-arm64" ;;
               *x86_64-apple-darwin*) suffix="-macos-x64" ;;
