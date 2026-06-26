@@ -6,7 +6,7 @@ use sem_core::ipc::{IpcServer, PruneTask};
 use sem_core::state::{LightState, StateMachine};
 use semctl::install;
 use tauri::{
-    menu::{Menu, MenuItem},
+    menu::{CheckMenuItem, Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager,
 };
@@ -44,6 +44,16 @@ fn install_hooks(tool: String) -> Result<(), String> {
     install::run_install(all, tool_opt).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn show_settings(app: AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("settings") {
+        window.show().map_err(|e| e.to_string())?;
+        window.center().map_err(|e| e.to_string())?;
+        window.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 fn emit_state(app: &AppHandle, state: LightState) {
     let payload = StatePayload {
         state: match state {
@@ -65,9 +75,10 @@ fn focus_main_window(app: &AppHandle) {
 fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Show Semaphore", true, None::<&str>)?;
     let hide = MenuItem::with_id(app, "hide", "Hide Window", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "settings", "Settings", true, None::<&str>)?;
     let stealth = MenuItem::with_id(app, "stealth", "Toggle Stealth", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &hide, &stealth, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &hide, &settings, &stealth, &quit])?;
 
     let _tray = TrayIconBuilder::new()
         .icon(app.default_window_icon().unwrap().clone())
@@ -78,6 +89,9 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();
                 }
+            }
+            "settings" => {
+                let _ = show_settings(app.clone());
             }
             "stealth" => {
                 if let Some(window) = app.get_webview_window("main") {
@@ -173,7 +187,8 @@ pub fn run() {
             get_config,
             save_config,
             set_stealth,
-            install_hooks
+            install_hooks,
+            show_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

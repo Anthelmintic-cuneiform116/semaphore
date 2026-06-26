@@ -23,6 +23,18 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "visible": true
+      },
+      {
+        "label": "settings",
+        "title": "Semaphore Settings",
+        "url": "settings.html",
+        "width": 420,
+        "height": 640,
+        "resizable": false,
+        "decorations": true,
+        "visible": false,
+        "center": true,
+        "skipTaskbar": false
       }
     ],
     "security": {
