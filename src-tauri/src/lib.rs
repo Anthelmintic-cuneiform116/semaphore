@@ -22,6 +22,8 @@ struct StatePayload {
 }
 
 struct LightTestRunning(AtomicBool);
+struct GeniusGameRunning(AtomicBool);
+struct IpcStateMachine(Arc<RwLock<StateMachine>>);
 
 const LIGHT_TEST_STEP_MS: u64 = 480;
 
@@ -55,6 +57,13 @@ async fn run_light_test(app: AppHandle) {
         return;
     }
 
+    if genius_game_active(&app) {
+        if let Some(running) = app.try_state::<LightTestRunning>() {
+            running.0.store(false, Ordering::SeqCst);
+        }
+        return;
+    }
+
     let original = app
         .try_state::<TrayLight>()
         .map(|tray_light| *tray_light.0.read().unwrap_or_else(|e| e.into_inner()))
@@ -74,6 +83,66 @@ async fn run_light_test(app: AppHandle) {
     if let Some(running) = app.try_state::<LightTestRunning>() {
         running.0.store(false, Ordering::SeqCst);
     }
+}
+
+fn genius_game_active(app: &AppHandle) -> bool {
+    app.try_state::<GeniusGameRunning>()
+        .is_some_and(|running| running.0.load(Ordering::SeqCst))
+}
+
+async fn start_genius_game(app: AppHandle) {
+    if app
+        .try_state::<GeniusGameRunning>()
+        .is_none_or(|running| running.0.swap(true, Ordering::SeqCst))
+    {
+        return;
+    }
+
+    if app
+        .try_state::<LightTestRunning>()
+        .is_some_and(|running| running.0.load(Ordering::SeqCst))
+    {
+        if let Some(running) = app.try_state::<GeniusGameRunning>() {
+            running.0.store(false, Ordering::SeqCst);
+        }
+        return;
+    }
+
+    let original = app
+        .try_state::<TrayLight>()
+        .map(|tray_light| *tray_light.0.read().unwrap_or_else(|e| e.into_inner()))
+        .unwrap_or(LightState::Green);
+
+    focus_main_window(&app);
+    let _ = app.emit("genius-game-start", state_payload(original));
+}
+
+#[tauri::command]
+fn genius_preview_light(app: AppHandle, state: String) -> Result<(), String> {
+    if !genius_game_active(&app) {
+        return Err("genius game not running".to_string());
+    }
+
+    let parsed = LightState::parse(&state).ok_or_else(|| "invalid state".to_string())?;
+    preview_light(&app, parsed);
+    Ok(())
+}
+
+#[tauri::command]
+async fn end_genius_game(app: AppHandle) -> Result<String, String> {
+    if let Some(running) = app.try_state::<GeniusGameRunning>() {
+        running.0.store(false, Ordering::SeqCst);
+    }
+
+    let state = if let Some(sm) = app.try_state::<IpcStateMachine>() {
+        let guard = sm.0.read().await;
+        guard.aggregated()
+    } else {
+        LightState::Green
+    };
+
+    emit_state(&app, state);
+    Ok(light_state_name(state).to_string())
 }
 
 #[tauri::command]
@@ -342,6 +411,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let always_on_top_toggle = always_on_top.clone();
     let horizontal_toggle = horizontal.clone();
     let test_lights = MenuItem::with_id(app, "test_lights", "Test Lights", true, None::<&str>)?;
+    let play_genius = MenuItem::with_id(app, "play_genius", "Play Genius", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
@@ -353,6 +423,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             &always_on_top,
             &horizontal,
             &test_lights,
+            &play_genius,
             &quit,
         ],
     )?;
@@ -401,6 +472,9 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             }
             "test_lights" => {
                 tauri::async_runtime::spawn(run_light_test(app.clone()));
+            }
+            "play_genius" => {
+                tauri::async_runtime::spawn(start_genius_game(app.clone()));
             }
             "quit" => {
                 app.exit(0);
@@ -483,6 +557,8 @@ pub fn run() {
             let _ = install::prepare_runtime();
             app.manage(TrayLight(Arc::new(StdRwLock::new(LightState::Green))));
             app.manage(LightTestRunning(AtomicBool::new(false)));
+            app.manage(GeniusGameRunning(AtomicBool::new(false)));
+            app.manage(IpcStateMachine(Arc::clone(&machine_setup)));
             setup_tray(app.handle())?;
             start_ipc(app.handle(), machine_setup);
 
@@ -516,7 +592,9 @@ pub fn run() {
             apply_window_size,
             import_stage_sound,
             set_autostart,
-            sync_launch_hooks
+            sync_launch_hooks,
+            genius_preview_light,
+            end_genius_game
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
