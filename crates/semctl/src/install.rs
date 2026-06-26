@@ -273,7 +273,7 @@ fn merge_cursor_hooks(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         "preToolUse",
         "red",
         "writing",
-        Some("Write|Edit|Shell"),
+        Some("Write|Edit"),
     );
     insert_hook(hooks, "afterFileEdit", "red", "writing", None);
     insert_hook(
@@ -281,8 +281,12 @@ fn merge_cursor_hooks(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         "postToolUse",
         "yellow",
         "thinking",
-        Some("Write|Edit"),
+        Some("Write|Edit|Shell"),
     );
+    insert_hook(hooks, "beforeShellExecution", "green", "awaiting-input", None);
+    insert_hook(hooks, "afterShellExecution", "yellow", "thinking", None);
+    insert_hook(hooks, "beforeMCPExecution", "green", "awaiting-input", None);
+    insert_hook(hooks, "afterMCPExecution", "yellow", "thinking", None);
     insert_hook(hooks, "stop", "green", "awaiting-input", None);
     insert_hook(hooks, "sessionEnd", "green", "idle", None);
 
