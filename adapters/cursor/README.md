@@ -6,9 +6,13 @@ Config: `~/.cursor/hooks.json` (or project `.cursor/hooks.json`)
 |-------|-------|-------|
 | `beforeSubmitPrompt` | yellow | User sent a prompt |
 | `afterAgentThought` | yellow | Thinking block completed |
-| `preToolUse` (Write\|Edit\|Shell) | red | Tool about to run |
+| `preToolUse` (Write\|Edit) | red | File tool about to run |
 | `afterFileEdit` | red | File was edited |
-| `postToolUse` (Write\|Edit) | yellow | Back to thinking |
+| `postToolUse` (Write\|Edit\|Shell) | yellow | Back to thinking |
+| `beforeShellExecution` | green (blinking) | Terminal command waiting for Run/Skip |
+| `afterShellExecution` | yellow | Shell command finished |
+| `beforeMCPExecution` | green (blinking) | MCP tool waiting for approval |
+| `afterMCPExecution` | yellow | MCP tool finished |
 | `stop` | green (blinking) | Turn finished — waiting for your reply |
 | `sessionEnd` | green | Session closed |
 
