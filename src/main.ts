@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { applyTheme } from "./themes";
 import { t, type Locale } from "./i18n";
-import { playStageSound } from "./sounds";
+import { playStageSound, playTestLightsMelody } from "./sounds";
 import {
   pointerDistance,
   shouldOpenSettingsOnDoubleClick,
@@ -114,6 +114,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   await listen<{ state: Light }>("state-changed", (event) => {
     handleStateChange(event.payload.state);
+  });
+
+  await listen<{ state: Light }>("light-preview", (event) => {
+    setActiveLight(event.payload.state);
+  });
+
+  await listen("test-lights-start", () => {
+    playTestLightsMelody();
   });
 
   await listen<Config>("config-changed", async (event) => {
