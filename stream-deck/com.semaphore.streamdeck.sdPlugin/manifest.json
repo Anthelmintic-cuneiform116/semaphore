@@ -1,0 +1,35 @@
+{
+  "Name": "Semaphore",
+  "Version": "1.0.0",
+  "Author": "Semaphore",
+  "Description": "Shows the Semaphore AI agent traffic light (green / yellow / red) on your Stream Deck key.",
+  "Category": "Semaphore",
+  "CategoryIcon": "imgs/category",
+  "Icon": "imgs/plugin",
+  "SDKVersion": 2,
+  "CodePath": "bin/plugin.js",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "Actions": [
+    {
+      "Name": "Semaphore Light",
+      "UUID": "com.semaphore.streamdeck.light",
+      "Icon": "imgs/action",
+      "Tooltip": "Shows the current Semaphore AI agent state: green (idle), yellow (thinking), or red (writing files).",
+      "SupportedInMultiActions": false,
+      "States": [
+        {
+          "Image": "imgs/unknown",
+          "Name": "Unknown"
+        }
+      ]
+    }
+  ],
+  "OS": [
+    { "Platform": "windows", "MinimumVersion": "10" },
+    { "Platform": "mac", "MinimumVersion": "10.15" }
+  ],
+  "Software": { "MinimumVersion": "6.0" }
+}
