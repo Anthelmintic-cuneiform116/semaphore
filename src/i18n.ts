@@ -51,10 +51,13 @@ export interface LocaleStrings {
     notInstalled: string;
     notConnected: string;
   };
-  main: {
-    dragHint: string;
-    settingsHint: string;
-  };
+    main: {
+      dragHint: string;
+      settingsHint: string;
+      geniusRound: (round: number) => string;
+      geniusNice: (round: number) => string;
+      geniusGameOver: (round: number) => string;
+    };
   about: {
     title: string;
     description: string;
@@ -147,6 +150,10 @@ export const locales: Record<Locale, LocaleStrings> = {
     main: {
       dragHint: "Drag to move · Double-click for settings",
       settingsHint: "Double-click to open settings",
+      geniusRound: (round) => `Genius — Round ${round}. Repeat the sequence.`,
+      geniusNice: (round) => `Nice! Round ${round}`,
+      geniusGameOver: (round) =>
+        round > 0 ? `Game over — you reached round ${round}` : "Game over",
     },
     about: {
       title: "About Semaphore",
@@ -180,6 +187,7 @@ export const locales: Record<Locale, LocaleStrings> = {
         "Always on Top — keep the widget above other windows",
         "Horizontal — lay out the traffic light side by side",
         "Test Lights — play a short melody and cycle green, yellow, and red",
+        "Play Genius — memory game with the traffic lights",
         "Quit — exit Semaphore",
       ],
     },
@@ -259,6 +267,10 @@ export const locales: Record<Locale, LocaleStrings> = {
     main: {
       dragHint: "Arraste para mover · Duplo clique para configs",
       settingsHint: "Duplo clique para abrir configurações",
+      geniusRound: (round) => `Genius — Rodada ${round}. Repita a sequência.`,
+      geniusNice: (round) => `Mandou bem! Rodada ${round}`,
+      geniusGameOver: (round) =>
+        round > 0 ? `Fim de jogo — você chegou na rodada ${round}` : "Fim de jogo",
     },
     about: {
       title: "Sobre o Semaphore",
@@ -292,6 +304,7 @@ export const locales: Record<Locale, LocaleStrings> = {
         "Always on Top — mantém o widget acima das outras janelas",
         "Horizontal — exibe o semáforo na horizontal",
         "Testar luzes — toca uma melodia curta e alterna verde, amarelo e vermelho",
+        "Jogar Genius — jogo de memória com o semáforo",
         "Quit — encerra o Semaphore",
       ],
     },
