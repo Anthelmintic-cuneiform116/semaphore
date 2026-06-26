@@ -411,7 +411,7 @@ To add a language, see [locales/CONTRIBUTING-i18n.md](locales/CONTRIBUTING-i18n.
 
 ## Sounds
 
-Optional audio plays when the light changes state. Configure in **Settings → Sounds**.
+Sounds play when the light changes state (off by default). Configure in **Settings → Sounds**.
 
 | Stage | Default preset |
 |-------|----------------|
@@ -433,7 +433,7 @@ Stealth mode hides the widget from many screen-capture and screen-sharing tools 
 | **macOS 15+** | May still appear in some apps (OS limitation) |
 | **Linux** | Depends on compositor |
 
-Enable in **Settings** or the tray menu (**Toggle Stealth**). A one-time acknowledgment is stored in config.
+Enable in **Settings** or the tray menu (**Toggle Stealth**). You only confirm this once; the choice is saved in config.
 
 ---
 
@@ -442,7 +442,7 @@ Enable in **Settings** or the tray menu (**Toggle Stealth**). A one-time acknowl
 ### Light stays green while the agent is working
 
 1. Confirm Semaphore is running (tray icon visible).
-2. Run `semctl doctor` — check that hooks show `[ok]` for your tool.
+2. Run `semctl doctor` and check that hooks show `[ok]` for your tool.
 3. Reconnect the tool: **Settings → Tools → Connect**, or `semctl install <tool>`.
 4. Restart the AI tool so it reloads hook config.
 5. For **Codex CLI**, ensure `codex_hooks = true` in `~/.codex/config.toml` (the installer sets this).
@@ -490,4 +490,4 @@ Every push to `main` and every pull request runs `cargo test`, `cargo build -p s
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
