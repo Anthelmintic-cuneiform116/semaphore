@@ -1,3 +1,4 @@
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, RwLock as StdRwLock};
 use std::time::Duration;
 
@@ -18,6 +19,61 @@ use tokio::sync::RwLock;
 #[derive(Clone, serde::Serialize)]
 struct StatePayload {
     state: String,
+}
+
+struct LightTestRunning(AtomicBool);
+
+const LIGHT_TEST_STEP_MS: u64 = 480;
+
+fn light_state_name(state: LightState) -> &'static str {
+    match state {
+        LightState::Green => "green",
+        LightState::Yellow => "yellow",
+        LightState::Red => "red",
+    }
+}
+
+fn state_payload(state: LightState) -> StatePayload {
+    StatePayload {
+        state: light_state_name(state).to_string(),
+    }
+}
+
+fn preview_light(app: &AppHandle, state: LightState) {
+    let theme = Config::load().theme;
+    if let Some(tray) = app.tray_by_id(TRAY_ICON_ID) {
+        let _ = tray.set_icon(Some(circle_tray_icon(state, &theme)));
+    }
+    let _ = app.emit("light-preview", state_payload(state));
+}
+
+async fn run_light_test(app: AppHandle) {
+    if app
+        .try_state::<LightTestRunning>()
+        .is_none_or(|running| running.0.swap(true, Ordering::SeqCst))
+    {
+        return;
+    }
+
+    let original = app
+        .try_state::<TrayLight>()
+        .map(|tray_light| *tray_light.0.read().unwrap_or_else(|e| e.into_inner()))
+        .unwrap_or(LightState::Green);
+
+    focus_main_window(&app);
+    let _ = app.emit("test-lights-start", ());
+
+    for state in [LightState::Green, LightState::Yellow, LightState::Red] {
+        preview_light(&app, state);
+        tokio::time::sleep(Duration::from_millis(LIGHT_TEST_STEP_MS)).await;
+    }
+
+    preview_light(&app, original);
+
+    let _ = app.emit("test-lights-end", ());
+    if let Some(running) = app.try_state::<LightTestRunning>() {
+        running.0.store(false, Ordering::SeqCst);
+    }
 }
 
 #[tauri::command]
@@ -235,13 +291,7 @@ fn emit_state(app: &AppHandle, state: LightState) {
         }
     }
 
-    let payload = StatePayload {
-        state: match state {
-            LightState::Green => "green".to_string(),
-            LightState::Yellow => "yellow".to_string(),
-            LightState::Red => "red".to_string(),
-        },
-    };
+    let payload = state_payload(state);
     let _ = app.emit("state-changed", payload);
     refresh_tray_icon(app);
 }
@@ -291,6 +341,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     )?;
     let always_on_top_toggle = always_on_top.clone();
     let horizontal_toggle = horizontal.clone();
+    let test_lights = MenuItem::with_id(app, "test_lights", "Test Lights", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(
         app,
@@ -301,6 +352,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             &stealth,
             &always_on_top,
             &horizontal,
+            &test_lights,
             &quit,
         ],
     )?;
@@ -346,6 +398,9 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
                 let _ = horizontal_toggle.set_checked(config.window.horizontal);
                 let _ = config.save();
                 let _ = app.emit("config-changed", config);
+            }
+            "test_lights" => {
+                tauri::async_runtime::spawn(run_light_test(app.clone()));
             }
             "quit" => {
                 app.exit(0);
@@ -427,6 +482,7 @@ pub fn run() {
 
             let _ = install::prepare_runtime();
             app.manage(TrayLight(Arc::new(StdRwLock::new(LightState::Green))));
+            app.manage(LightTestRunning(AtomicBool::new(false)));
             setup_tray(app.handle())?;
             start_ipc(app.handle(), machine_setup);
 
