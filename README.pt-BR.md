@@ -63,6 +63,8 @@ Opções: tema, tamanho, idioma, modo furtivo, sempre no topo, sons, conexão de
 | **Alternar modo furtivo** | Oculta da captura de tela |
 | **Sempre no topo** | Mantém acima das outras janelas |
 | **Horizontal** | Layout horizontal do semáforo |
+| **Testar luzes** | Toca uma melodia curta e alterna verde, amarelo e vermelho |
+| **Jogar Genius** | Jogo de memória — repita a sequência clicando nas luzes |
 | **Sair** | Encerra o Semaphore |
 
 Clique com o botão esquerdo no ícone do tray para mostrar/focar o widget.

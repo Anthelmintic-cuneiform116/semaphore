@@ -103,6 +103,8 @@ Right-click the Semaphore icon in the system tray:
 | **Toggle Stealth** | Hide the widget from screen capture |
 | **Always on Top** | Keep the widget above other windows (not in macOS fullscreen) |
 | **Horizontal** | Rotate the traffic light to a horizontal layout |
+| **Test Lights** | Play a short melody and cycle green, yellow, and red |
+| **Play Genius** | Memory game — repeat the light sequence by clicking the lights |
 | **Quit** | Exit Semaphore |
 
 Left-click the tray icon to show/focus the widget.
