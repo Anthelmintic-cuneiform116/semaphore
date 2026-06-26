@@ -21,6 +21,19 @@ export interface LocaleStrings {
     connected: string;
     failed: string;
   };
+  main: {
+    dragHint: string;
+    settingsHint: string;
+  };
+  about: {
+    title: string;
+    description: string;
+    lights: string[];
+    controlsTitle: string;
+    controls: string[];
+    trayTitle: string;
+    trayMenu: string[];
+  };
 }
 
 export const locales: Record<Locale, LocaleStrings> = {
@@ -46,6 +59,34 @@ export const locales: Record<Locale, LocaleStrings> = {
       connected: "Hooks installed",
       failed: "Install failed",
     },
+    main: {
+      dragHint: "Click and drag here to move",
+      settingsHint: "Settings",
+    },
+    about: {
+      title: "About Semaphore",
+      description:
+        "Floating traffic light for AI coding agents. See at a glance when your agent is idle, thinking, or writing files.",
+      lights: [
+        "Green — ready for a new task",
+        "Yellow — thinking / running tools",
+        "Red — writing or editing files",
+      ],
+      controlsTitle: "Controls",
+      controls: [
+        "Drag the traffic light body to move the widget",
+        "Hover the widget and click ⚙ to open Settings",
+        "Left-click the tray icon to show the widget",
+      ],
+      trayTitle: "Tray menu (right-click tray icon)",
+      trayMenu: [
+        "Show Semaphore — show the floating widget",
+        "Hide Window — hide the widget",
+        "Settings — open this window",
+        "Toggle Stealth — hide from screen capture",
+        "Quit — exit Semaphore",
+      ],
+    },
   },
   "pt-BR": {
     settings: {
@@ -68,6 +109,34 @@ export const locales: Record<Locale, LocaleStrings> = {
       all: "Conectar todas",
       connected: "Hooks instalados",
       failed: "Falha na instalação",
+    },
+    main: {
+      dragHint: "Clique e arraste aqui para mover",
+      settingsHint: "Configurações",
+    },
+    about: {
+      title: "Sobre o Semaphore",
+      description:
+        "Semáforo flutuante para agentes de IA. Veja de relance quando seu agente está ocioso, pensando ou editando arquivos.",
+      lights: [
+        "Verde — pronto para uma nova tarefa",
+        "Amarelo — pensando / executando ferramentas",
+        "Vermelho — escrevendo ou editando arquivos",
+      ],
+      controlsTitle: "Controles",
+      controls: [
+        "Arraste o corpo do semáforo para mover o widget",
+        "Passe o mouse e clique em ⚙ para abrir Configurações",
+        "Clique esquerdo no ícone da bandeja para mostrar o widget",
+      ],
+      trayTitle: "Menu da bandeja (clique direito no ícone)",
+      trayMenu: [
+        "Show Semaphore — mostra o widget flutuante",
+        "Hide Window — oculta o widget",
+        "Settings — abre esta janela",
+        "Toggle Stealth — oculta da captura de tela",
+        "Quit — encerra o Semaphore",
+      ],
     },
   },
 };
