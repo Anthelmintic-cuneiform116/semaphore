@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "title": "Configurações",
+    "theme": "Tema",
+    "language": "Idioma",
+    "stealth": "Modo stealth (ocultar no compartilhamento de tela)",
+    "connect": "Conectar ferramentas",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "stealthNote": "Stealth funciona melhor no Windows. No macOS 15+ algumas ferramentas ainda podem capturar a janela."
+  },
+  "tools": {
+    "cursor": "Cursor",
+    "claude": "Claude Code",
+    "all": "Conectar todas",
+    "connected": "Hooks instalados",
+    "failed": "Falha na instalação"
+  }
+}

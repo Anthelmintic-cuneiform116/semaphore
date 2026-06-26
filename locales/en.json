@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "stealth": "Stealth mode (hide from screen share)",
+    "connect": "Connect tools",
+    "cancel": "Cancel",
+    "save": "Save",
+    "stealthNote": "Stealth works best on Windows. On macOS 15+ some capture tools may still record the window."
+  },
+  "tools": {
+    "cursor": "Cursor",
+    "claude": "Claude Code",
+    "all": "Connect all",
+    "connected": "Hooks installed",
+    "failed": "Install failed"
+  }
+}
