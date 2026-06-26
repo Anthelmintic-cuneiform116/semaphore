@@ -72,7 +72,12 @@ fn default_window_size() -> String {
 }
 
 /// Padding around the housing so box-shadow and light glow are not clipped.
-const WINDOW_INSET: u32 = 28;
+/// Top/left are zero so the widget can sit flush against screen corners; glow
+/// mostly extends downward (box-shadow) or from the active lens (usually bottom).
+const WINDOW_INSET_TOP: u32 = 0;
+const WINDOW_INSET_LEFT: u32 = 0;
+const WINDOW_INSET_BOTTOM: u32 = 28;
+const WINDOW_INSET_RIGHT: u32 = 28;
 
 fn housing_dimensions(size: &str) -> (u32, u32) {
     match size {
@@ -90,7 +95,10 @@ pub fn window_dimensions(size: &str, horizontal: bool) -> (u32, u32) {
     } else {
         (width, height)
     };
-    (width + 2 * WINDOW_INSET, height + 2 * WINDOW_INSET)
+    (
+        width + WINDOW_INSET_LEFT + WINDOW_INSET_RIGHT,
+        height + WINDOW_INSET_TOP + WINDOW_INSET_BOTTOM,
+    )
 }
 
 fn default_idle_timeout() -> u64 {
@@ -241,16 +249,16 @@ mod tests {
 
     #[test]
     fn window_dimensions_for_each_size() {
-        assert_eq!(window_dimensions("small", false), (98, 178));
-        assert_eq!(window_dimensions("medium", false), (112, 216));
-        assert_eq!(window_dimensions("large", false), (140, 292));
-        assert_eq!(window_dimensions("unknown", false), (112, 216));
+        assert_eq!(window_dimensions("small", false), (70, 150));
+        assert_eq!(window_dimensions("medium", false), (84, 188));
+        assert_eq!(window_dimensions("large", false), (112, 264));
+        assert_eq!(window_dimensions("unknown", false), (84, 188));
     }
 
     #[test]
     fn window_dimensions_horizontal_swaps_axes() {
-        assert_eq!(window_dimensions("medium", true), (216, 112));
-        assert_eq!(window_dimensions("small", true), (178, 98));
+        assert_eq!(window_dimensions("medium", true), (188, 84));
+        assert_eq!(window_dimensions("small", true), (150, 70));
     }
 
     #[test]

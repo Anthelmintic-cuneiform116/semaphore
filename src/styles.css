@@ -17,7 +17,10 @@
   --light-size: 40px;
   --light-border: 2px;
   --light-halo-scale: 1.35;
-  --window-inset: 28px;
+  --window-inset-top: 0px;
+  --window-inset-right: 28px;
+  --window-inset-bottom: 28px;
+  --window-inset-left: 0px;
 }
 
 body[data-size="small"] {
@@ -61,7 +64,8 @@ body {
 #app {
   width: fit-content;
   height: fit-content;
-  padding: var(--window-inset);
+  padding: var(--window-inset-top) var(--window-inset-right) var(--window-inset-bottom)
+    var(--window-inset-left);
   background: transparent;
 }
 
