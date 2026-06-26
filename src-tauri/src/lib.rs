@@ -55,6 +55,13 @@ fn emit_state(app: &AppHandle, state: LightState) {
     let _ = app.emit("state-changed", payload);
 }
 
+fn focus_main_window(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+}
+
 fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Show Semaphore", true, None::<&str>)?;
     let hide = MenuItem::with_id(app, "hide", "Hide Window", true, None::<&str>)?;
@@ -66,12 +73,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
-            "show" => {
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
-            }
+            "show" => focus_main_window(app),
             "hide" => {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();
@@ -97,16 +99,40 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
                 ..
             } = event
             {
-                let app = tray.app_handle();
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                }
+                focus_main_window(tray.app_handle());
             }
         })
         .build(app)?;
 
     Ok(())
+}
+
+fn start_ipc(app: &AppHandle, machine: Arc<RwLock<StateMachine>>) {
+    let machine_ipc = Arc::clone(&machine);
+    let machine_prune = Arc::clone(&machine);
+    let app_handle = app.clone();
+
+    let (server, handle) = IpcServer::new(machine_ipc);
+    let prune = PruneTask::new(machine_prune, handle.state_tx.clone());
+    let mut rx = handle.state_tx.subscribe();
+
+    tauri::async_runtime::spawn(async move {
+        if let Err(err) = server.run().await {
+            tracing::error!(?err, "ipc server failed");
+        }
+    });
+
+    tauri::async_runtime::spawn(prune.run());
+
+    tauri::async_runtime::spawn(async move {
+        loop {
+            match rx.recv().await {
+                Ok(state) => emit_state(&app_handle, state),
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                Err(_) => break,
+            }
+        }
+    });
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -120,36 +146,17 @@ pub fn run() {
     let machine = Arc::new(RwLock::new(StateMachine::new(Duration::from_secs(
         config.idle_timeout_secs,
     ))));
-    let machine_ipc = Arc::clone(&machine);
-    let machine_prune = Arc::clone(&machine);
+    let machine_setup = Arc::clone(&machine);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            focus_main_window(app);
+        }))
         .setup(move |app| {
+            let _ = install::prepare_runtime();
             setup_tray(app.handle())?;
-
-            let (server, handle) = IpcServer::new(machine_ipc);
-            let prune = PruneTask::new(machine_prune, handle.state_tx.clone());
-            let app_handle = app.handle().clone();
-            let mut rx = handle.state_tx.subscribe();
-
-            tauri::async_runtime::spawn(async move {
-                if let Err(err) = server.run().await {
-                    tracing::error!(?err, "ipc server failed");
-                }
-            });
-
-            tauri::async_runtime::spawn(prune.run());
-
-            tauri::async_runtime::spawn(async move {
-                loop {
-                    match rx.recv().await {
-                        Ok(state) => emit_state(&app_handle, state),
-                        Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
-                        Err(_) => break,
-                    }
-                }
-            });
+            start_ipc(app.handle(), machine_setup);
 
             if let Some(window) = app.get_webview_window("main") {
                 if config.stealth {

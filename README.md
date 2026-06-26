@@ -10,24 +10,29 @@ Red = writing / editing files
 
 Install Semaphore, open it once, connect your tools from Settings — no terminal required.
 
-1. Download a release for your OS
+1. Download a release for your OS (or build from source)
 2. Launch Semaphore (stays in the system tray)
-3. Open Settings → **Connect tools** (Cursor, Claude Code, …)
+3. Open Settings → **Connect tools**
 4. Use your AI tools normally
 
 Hooks call `semctl` in the background. You never run it manually.
 
 ## Supported tools (v0.1)
 
-| Tool | Status |
-|------|--------|
-| Cursor | Supported via `~/.cursor/hooks.json` |
-| Claude Code | Supported via `~/.claude/settings.json` |
-| Codex CLI | Planned (limited file-edit hooks today) |
-| Gemini CLI | Planned |
-| Copilot CLI | Planned |
+| Tool | Status | Install |
+|------|--------|---------|
+| Cursor | Supported | `semctl install cursor` |
+| Claude Code | Supported | `semctl install claude-code` |
+| Codex CLI | Supported (Bash hooks; file edit limited) | `semctl install codex` |
+| Gemini CLI | Supported | `semctl install gemini-cli` |
+| Copilot CLI | Best-effort (varies by version) | `semctl install copilot-cli` |
 
-Semaphore works with any tool that exposes lifecycle hooks. Adapters are pluggable.
+```bash
+semctl install --all
+semctl doctor
+```
+
+See [adapters/README.md](adapters/README.md) for per-tool hook mapping.
 
 ## Development
 
@@ -38,18 +43,10 @@ npm install
 npm run tauri dev
 ```
 
-Build CLI tools:
+Build CLI:
 
 ```bash
 cargo build -p semctl --release
-cargo build -p sem-core
-```
-
-Install hooks from the terminal (optional):
-
-```bash
-cargo run -p semctl -- install --all
-cargo run -p semctl -- doctor
 ```
 
 ## Architecture
@@ -62,13 +59,13 @@ AI tool hooks → sem-hook → semctl → Unix socket / named pipe → Semaphore
 - **semctl** — CLI for hooks and installer
 - **semaphore** (Tauri) — floating UI, tray, settings
 
-## Stealth mode
-
-Hides the window from many screen-capture tools using OS content protection. Works best on Windows. On macOS 15+ some capture tools may still record the window.
-
 ## Themes & i18n
 
-Built-in themes: Classic, Minimal. English (default) and Portuguese included. See `locales/CONTRIBUTING-i18n.md` to add languages.
+Built-in themes: Classic, Minimal, Neon (`src/themes/*.json`). English (default) and Portuguese. See `locales/CONTRIBUTING-i18n.md`.
+
+## Stealth mode
+
+Hides the window from many screen-capture tools. Works best on Windows; macOS 15+ may still capture in some apps.
 
 ## License
 
